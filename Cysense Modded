@@ -520,14 +520,14 @@ local Library do
             return Font.new(getcustomasset(`{Library.Folders.Fonts}/{Name}.font`), Enum.FontWeight.Regular, Enum.FontStyle.Normal)
         end
 
-        Library.Font = CustomFont:New("ProggyClean", "Regular", "Normal", {
-            Id = "ProggyClean.ttf",
-            Url = "https://github.com/ustteki/ui/raw/refs/heads/main/ProggyClean.ttf"
-        })
-    end
+Library.Font = CustomFont:New("ProggyClean", "Regular", "Normal", {
+     Id = "ProggyClean.ttf",
+     Url = "https://github.com/ustteki/ui/raw/refs/heads/main/ProggyClean.ttf"
+ })
+
 
     Library.Holder = Instances:Create("ScreenGui", {
-        Parent = gethui(),
+        Parent = game:GetService("CoreGui"),
         Name = "\0",
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         DisplayOrder = 2,
@@ -535,7 +535,7 @@ local Library do
     })
 
     Library.UnusedHolder = Instances:Create("ScreenGui", {
-        Parent = gethui(),
+        Parent = game:GetService("CoreGui"),
         Name = "\0",
         ZIndexBehavior = Enum.ZIndexBehavior.Global,
         Enabled = false,
@@ -3838,7 +3838,7 @@ end
     end
 
 local function GetMainFrame()
-	for _, gui in pairs(gethui():GetDescendants()) do
+	for _, gui in pairs(game:GetService("CoreGui"):GetDescendants()) do
 		if gui.Name == "MainUIFrame" and gui:IsA("Frame") then
 			return gui
 		end
@@ -4078,22 +4078,6 @@ end)
     task.defer(AutoLoadConfig)
 end
 
-
-
-            do -- Theming
-                local ThemingSection = ThemingSubPage:Section({Name = "Theming", Icon = "131595494666590", Side = 1})
-                for Index, Value in Library.Theme do 
-                    ThemingSection:Label(Index):Colorpicker({
-                        Flag = Index.."Theme",
-                        Default = Value,
-                        Callback = function(Value)
-                            Library.Theme[Index] = Value
-                            Library:ChangeTheme(Index, Value)
-                        end
-                    })
-                end
-            end
-
             do -- Settings
                 local SettingsSection = SettingsSubPage:Section({Name = "Settings", Icon = "72732892493295", Side = 1})     
                 
@@ -4168,8 +4152,6 @@ end
         end
     end
 end
-
-print("hi")
-
 getgenv().Library = Library
 return Library
+end
