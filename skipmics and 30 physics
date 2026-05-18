@@ -12,5 +12,5 @@
   "DFIntTaskSchedulerTargetFps": "9999999",
   "FFlagTaskSchedulerLimitTargetFpsTo2402": "False",
   "FFlagDebugDisplayFPS": "True",
-  "DFIntS2PhysicsSenderRate": "512"
+  "DFIntS2PhysicsSenderRate": "15"
 }
