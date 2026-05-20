@@ -1,16 +1,3 @@
 {
-  "DFFlagDoNotSkipMipsBasedOnSystemMemoryPS": "True",
-  "DFIntDebugLimitMinTextureResolutionWhenSkipMips": "2147483647",
-  "FFlagEnablePowerTraceModule": "True",
-  "FFlagIncludePowerSaverMode": "True",
-  "FFlagRenderUseTextureManager224": "False",
-  "FFlagTM2SkipMipsForUnstreamable2": "True",
-  "FIntDebugTextureManagerSkipMips": "100",
-  "DFIntTextureQualityOverride": "0",
-  "DFFlagTextureQualityOverrideEnabled": "True",
-  "FFlagDisablePostFx": "True",
-  "DFIntTaskSchedulerTargetFps": "9999999",
-  "FFlagTaskSchedulerLimitTargetFpsTo2402": "False",
-  "FFlagDebugDisplayFPS": "True",
   "DFIntS2PhysicsSenderRate": "512"
 }
