@@ -1,7 +1,7 @@
 getgenv().FolderName = "ModdedLibrary"
 getgenv().UILogo = "rbxassetid://126152115075698"
 
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/cryptium-lua/encrypted/refs/heads/main/lalalalala"))()
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/crucifiedbylua/roblox-stuff/refs/heads/main/Cysense%20Modded"))()
 
 local Window = Library:Window({ Name = "Game Name", SubTitle = "Hub Name", ExpiresIn = "N/A" })
 Window:Category("Catagory")
