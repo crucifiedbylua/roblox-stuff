@@ -1,0 +1,173 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local KnitClient = require(ReplicatedStorage.Packages.Knit.KnitClient)
+local Popup = require(ReplicatedStorage.Shared.Popup)
+local AbilityUtils = require(ReplicatedStorage.Shared.AbilityUtils)
+local AB = require(ReplicatedStorage.AbilityBalancing)
+local LocalPlayer = Players.LocalPlayer
+local playerGui = LocalPlayer:WaitForChild("PlayerGui")
+AB.Camouflage.TravelDistance = 20
+AB.CrossElasticoNutmeg.Cooldown = 30
+AB.CrossElasticoNutmeg.TravelDistance = 50
+AB.CrossElasticoNutmeg.ActivationRangePlayer = 20
+AB.Trivela.ShotPower = 150
+AB.CloseQuarterDribble.TravelDistance = 70
+AB.LobPass.Cooldown = 30
+AB.LobPass.ActivationRangePlayer = 300
+AB.OppressivePass.Cooldown = 30
+AB.OppressivePass.ActivationRangePlayer = 280
+AB.OppressivePass.TravelDistance = 32
+AB.PhysicalPressure.Cooldown = 35
+AB.PhysicalPressure.ActivationRangePlayer = 25
+AB.PhysicalPressure.TravelDistance = 18
+AB.ChameleonDefense.Cooldown = 30
+AB.ChameleonDefense.ActivationRangeBall = 60
+AB.MetaDefense.Cooldown = 30
+AB.MetaDefense.EnemyRange = 100
+AB.ChameleonVolley.Cooldown = 50
+AB.ChameleonVolley.ShotPower = 220
+AB.ChameleonVolley.ShotTiltVector = Vector3.new(0, 0.12, 0)
+AB.ChameleonVolley.EnemyRange = 80
+AB.ReoGyroShot.Cooldown = 50
+AB.ReoGyroShot.ShotPower = 230
+AB.ReoGyroShot.ShotTiltVector = Vector3.new(0, 0.13, 0)
+AB.ReoDragonDrive.Cooldown = 50
+AB.ReoDragonDrive.ShotPower = 190
+AB.ReoDragonDrive.ShotTiltVector = Vector3.new(0, 0.13, 0)
+AB.ReoTapLift.Cooldown = 50
+AB.ReoTapLift.ShotPower = 175
+AB.ReoTapLift.ShotTiltVector = Vector3.new(0, 0.13, 0)
+AB.ReoSerpentRedirect.Cooldown = 50
+AB.ReoSerpentRedirect.ShotPower = 140
+AB.ReoSerpentRedirect.ShotTiltVector = Vector3.new(0, 0.12, 0)
+
+local cd = 30
+local range = 20
+local boost = 10
+local initWait = 0
+local ballHeight = 20
+local AbilityController = require(ReplicatedStorage.Controllers.AbilityController)
+local AbilityService = KnitClient.GetService("AbilityService")
+local orig = AbilityController.ExecuteAbilitySlot
+local function isCamo()
+local label = playerGui:FindFirstChild("InGameUI") and playerGui.InGameUI:FindFirstChild("Bottom") and playerGui.InGameUI.Bottom:FindFirstChild("Abilities") and playerGui.InGameUI.Bottom.Abilities:FindFirstChild("2") and playerGui.InGameUI.Bottom.Abilities["2"]:FindFirstChild("AbilityLabel")
+if label then
+return label.Text == "Camouflage" or label.Text:find("Chameleon") ~= nil
+end
+return false
+end
+AbilityController.ExecuteAbilitySlot = function(self, slot, p3)
+if slot ~= 2 then return orig(self, slot, p3) end
+if not isCamo() then
+return orig(self, slot, p3)
+end
+local char = LocalPlayer.Character
+if not char then return end
+if char:GetAttribute("CopyMode") then return orig(self, slot, p3) end
+local i = AbilityController.legacy
+if char.Values.HasBall.Value then return orig(self, slot, p3) end
+if i.StatesController:IsAwakened() then return orig(self, slot, p3) end
+if not AbilityUtils.rules.grounded() then return orig(self, slot, p3) end
+if not AbilityUtils.rules.slotReady(2) then return orig(self, slot, p3) end
+if char:GetAttribute("CloseQuartersDribble") then return orig(self, slot, p3) end
+if i.TrivelaShot then
+Popup.Popup(LocalPlayer, "You cannot use this skill right now!")
+return
+end
+i.StatesController.States.Ability = true
+i.StatesController.OwnWalkState = true
+i.StatesController.SpeedBoost = boost
+i.Animations.Abilities.Camouflage.Priority = Enum.AnimationPriority.Action4
+i.Animations.Abilities.Camouflage:Play()
+AbilityService.Ability:Fire("Camouflage", { State = "Dash" })
+local hrp = char.HumanoidRootPart
+for _, v in hrp:GetDescendants() do
+if v:IsA("AlignPosition") or v:IsA("BodyVelocity") then
+v:Destroy()
+end
+end
+task.wait(initWait)
+local function applyUI()
+local btn = LocalPlayer.PlayerGui.InGameUI.Bottom.Abilities:FindFirstChild("2")
+if not btn then return end
+local scale = btn:FindFirstChild("UIScale")
+if scale then
+scale.Scale = 1.25
+btn.ImageColor3 = Color3.fromRGB(26, 255, 53)
+TweenService:Create(scale, TweenInfo.new(0.85, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { Scale = 1 }):Play()
+TweenService:Create(btn, TweenInfo.new(0.85, Enum.EasingStyle.Linear, Enum.EasingDirection.Out), { ImageColor3 = Color3.fromRGB(255, 255, 255) }):Play()
+end
+i:AbilityCooldown("2", cd)
+char:SetAttribute("LastV", workspace:GetServerTimeNow() + cd)
+end
+local conn
+conn = RunService.Heartbeat:Connect(function()
+if char.Values.HasBall.Value then
+conn:Disconnect()
+return
+end
+local ball = ReplicatedStorage.Football.Value
+if ball.IFrame.Value > workspace:GetServerTimeNow() then return end
+if ball.Parent == workspace and ball.Position.Y < ballHeight then
+if ball.OnPlayer.Value then return end
+if (ball.Position - hrp.Position).Magnitude > range then return end
+conn:Disconnect()
+AbilityService.Ability:Fire("Camouflage", { State = "Steal" })
+applyUI()
+else
+for _, p in Players:GetPlayers() do
+if p ~= LocalPlayer
+and p.Character
+and p.Character.Values.HasBall.Value
+and LocalPlayer.Team ~= p.Team
+and (p.Character.HumanoidRootPart.Position - hrp.Position).Magnitude <= range
+and not (p.PlayerStats.InAwakening.Value
+or p.Character.Values.Dribbling.Value
+or (p.Character.Values.Goalie.Value and p.Character.Values.IsInPenalty.Value)) then
+conn:Disconnect()
+AbilityService.Ability:Fire("Camouflage", { State = "Steal", enemy = p.Character })
+applyUI()
+return
+end
+end
+local rig = workspace:FindFirstChild("PassRig")
+if not (rig and rig:GetAttribute("IsTrainingDummy")) then return end
+local values = rig:FindFirstChild("Values")
+local hasBall = values and values:FindFirstChild("HasBall")
+if not (hasBall and hasBall.Value) then return end
+local rigHRP = rig:FindFirstChild("HumanoidRootPart")
+if not (rigHRP and (rigHRP.Position - hrp.Position).Magnitude <= range) then return end
+conn:Disconnect()
+AbilityService.Ability:Fire("Camouflage", { State = "Steal", enemy = rig })
+i:AbilityCooldown("2", cd)
+char:SetAttribute("LastV", workspace:GetServerTimeNow() + cd)
+end
+end)
+i.ABC:Add(function()
+if conn then conn:Disconnect() end
+if not (char:GetAttribute("Trivela") or char:GetAttribute("LongPass")) then
+i:AbilityCooldown("2", cd)
+char:SetAttribute("LastV", workspace:GetServerTimeNow() + cd)
+end
+i.StatesController.OwnWalkState = false
+i.StatesController.States.Ability = false
+i.StatesController.SpeedBoost = 0
+end)
+for iter = 1, 3 do
+local sideVec = iter == 2 and hrp.CFrame.RightVector
+or iter == 3 and Vector3.new(0, 0, 0)
+or -hrp.CFrame.RightVector
+local dir = Vector3.new(
+(hrp.CFrame.LookVector + sideVec / 2).Unit.X,
+0,
+(hrp.CFrame.LookVector + sideVec / 2).Unit.Z
+).Unit
+AbilityUtils.FastDashTo(char, hrp.Position + dir * AB.Camouflage.TravelDistance, -2, 0.2)
+task.wait(0.2)
+end
+i.ABC:Clean()
+end
+print("Made By Hxtred")
+print("Improved by lua")
